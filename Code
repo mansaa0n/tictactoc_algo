@@ -1,0 +1,151 @@
+import UIKit
+
+// Model
+let user = "X"
+let computer = "O"
+var Cells  = [["X","-","-"],
+              ["-","-","-"],
+              ["-","-","-"]]  // Board
+
+var PossibleWins = ["048":["-","-","-"], "036":["-","-","-"], "147":["-","-","-"], "258": ["-","-","-"],"012":["-","-","-"],"345":["-","-","-"], "678":["-","-","-"], "246":["-","-","-"]] // all possible winning moves
+
+func findBestMove(){
+    // check user's prev moves
+    let index = checkComputerMoves()
+        getCoord(index: index!)
+    
+}
+// get x and y
+func getCoord(index: Int){
+    var coordiates : [Int] = []
+    switch index {
+    case 0:
+        coordiates = [0,0]
+    case 1:
+        coordiates = [0,1]
+    case 2:
+        coordiates = [0,2]
+    case 3:
+        coordiates = [1,0]
+    case 4:
+        coordiates = [1,1]
+    case 5:
+        coordiates = [1,2]
+    case 6:
+        coordiates = [2,0]
+    case 7:
+        coordiates = [2,1]
+    case 8:
+        coordiates = [2,2]
+    default:
+        coordiates = [0,0]
+    }
+    makeMove(coodr: coordiates, index: Character(String(index)))
+}
+// update Board
+func makeMove(coodr: [Int], index: Character){
+    // make the move on the cells
+    Cells[coodr[0]][coodr[1]] = computer
+    // mark the move on the possible winning
+    
+    for (key, val) in PossibleWins{
+        var key_Arr:[Character] = []
+        let _: () = key.forEach{key_Arr.append($0)}
+        if key_Arr.contains(index){
+            let CharIndex = key_Arr.firstIndex(of: index)
+            var newVal = val
+            newVal[CharIndex!] = computer
+            PossibleWins[key] = newVal
+        }
+        
+    }
+    print(Cells)
+    print(PossibleWins)
+}
+func checkUserMoves()->(Int?,Bool){
+    let userFilteredVal = PossibleWins.filter{$0.value.contains(user) && !($0.value.contains(computer))}
+    //  we need to check if user has already 2 moves and need to make one more
+    //let filter_u: () = userFilteredVal.values.forEach{$0.forEach{$0; if ($0 == user){ count += 1}}}
+    for (key,val) in userFilteredVal{
+        var count = 0
+        for v in val{
+                if count < 2 && v == user{
+                    count += 1
+                }
+                if count == 2{
+                   // make a move and break the loop
+                    let TargetIndex = userFilteredVal[key]!.firstIndex(of: "-")
+                    var key_Arr:[Character] = []
+                    let _: () = key.forEach{key_Arr.append($0)}
+                    //print(key_Arr[TargetIndex!]) // Perfect Move
+                    let indexVal = Int(String(key_Arr[TargetIndex!]))
+                    print(indexVal!)
+                  
+                    //getCoord(index: indexVal!)
+                    //pass it to makeMove func
+                    return (indexVal!, true)
+                }
+                
+        }
+    }
+        return (nil, false)
+        // If no move has been made yet, check computer possible moves
+        //checkComputerMoves(Board: Board, user: user, computer:computer, prevMoves: prevMoves)
+  
+    
+    // Then check computers prev moves if none of user's moves is winning
+    // Else make a move
+}
+func checkComputerMoves()->(Int?){
+    let ComputerfilteredVal = PossibleWins.filter{$0.value.contains(computer) && !($0.value.contains(user))}
+    // count the "O" if 2 then make a move here if not make move anywhere
+    let CountPrevMoves = ComputerfilteredVal.count
+    let (indexFrmUser, checkUser) = checkUserMoves()
+    if CountPrevMoves == 0{
+        // no move has been made yet
+        // chcek where user had made a move
+        // make a winning move
+        return _helper_checkComputerMoves()
+    }else if CountPrevMoves >= 1 && checkUser == false{
+        // check user
+        return _helper_checkComputerMoves()
+    }
+    
+    return indexFrmUser //  need to check user
+  
+}
+
+func _helper_checkComputerMoves()->Int{
+    let possibleMovesfilteredVal = PossibleWins.filter{$0.value.contains("-") || $0.value.contains("O") && !($0.value.contains(user))}
+    
+    var sortedKeys:[String] = []
+    for (k,v) in possibleMovesfilteredVal{
+        var count = 0
+        for val in v{
+            if val == computer{
+                count += 1
+            }
+        }
+        if count > 1{
+            // insert key at begining
+            sortedKeys.insert(k, at: 0)
+            
+        }else{
+            // insert key at end
+            sortedKeys.append(k)
+            
+        }
+    }
+    
+    let TargetIndex = possibleMovesfilteredVal[sortedKeys[0]]!.firstIndex(of: "-")
+    var key_Arr:[Character] = []
+    let _: () = sortedKeys[0].forEach{key_Arr.append($0)}
+    
+    print(key_Arr[TargetIndex!]) // Perfect Move
+    return(Int(String(key_Arr[TargetIndex!]))!)
+    
+}
+
+
+
+findBestMove()
